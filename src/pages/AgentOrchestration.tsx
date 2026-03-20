@@ -153,7 +153,7 @@ export default function AgentOrchestration() {
                     <text
                       x={node.x} y={node.y + 10}
                       textAnchor="middle"
-                      fill="hsl(222, 47%, 11%)"
+                        fill="hsl(0, 0%, 100%)"
                       fontSize={9}
                       fontWeight="600"
                     >
