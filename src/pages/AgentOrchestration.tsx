@@ -178,7 +178,7 @@ export default function AgentOrchestration() {
                         stroke={sub.status === "active" ? "hsl(160, 84%, 39%)" : sub.status === "queued" ? "hsl(213, 58%, 45%)" : "hsl(38, 92%, 50%)"}
                         strokeWidth={selected === sub.id ? 2 : 1}
                       />
-                      <text x={sub.x} y={sub.y - 8} textAnchor="middle" fill="hsl(210, 40%, 98%)" fontSize={8} fontWeight="500">
+                      <text x={sub.x} y={sub.y - 8} textAnchor="middle" fill="hsl(222, 47%, 11%)" fontSize={8} fontWeight="500">
                         {sub.name}
                       </text>
                       <text x={sub.x} y={sub.y + 6} textAnchor="middle" fill="hsl(215, 20%, 55%)" fontSize={7}>
