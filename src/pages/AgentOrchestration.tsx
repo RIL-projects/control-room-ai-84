@@ -131,7 +131,7 @@ export default function AgentOrchestration() {
                       cx={node.x} cy={node.y}
                       r={40}
                       fill="hsl(0, 0%, 100%)"
-                      stroke={node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"}
+                      stroke={node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"} className="drop-shadow-sm"
                       strokeWidth={selected === node.id ? 3 : 2}
                     >
                       <animate
