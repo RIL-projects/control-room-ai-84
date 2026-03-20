@@ -42,8 +42,8 @@ export default function FinanceAgent() {
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: "hsl(222, 47%, 14%)", border: "1px solid hsl(217, 33%, 22%)", borderRadius: 8, fontSize: 12 }}
-                itemStyle={{ color: "hsl(210, 40%, 98%)" }}
+                contentStyle={{ background: "white", border: "1px solid hsl(220, 13%, 87%)", borderRadius: 8, fontSize: 12 }}
+                itemStyle={{ color: "hsl(222, 47%, 11%)" }}
                 formatter={(v: number) => `₹${v}K`}
               />
               <Legend wrapperStyle={{ fontSize: 11 }} />

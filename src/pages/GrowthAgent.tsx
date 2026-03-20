@@ -60,8 +60,8 @@ export default function GrowthAgent() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ background: "hsl(222, 47%, 14%)", border: "1px solid hsl(217, 33%, 22%)", borderRadius: 8, fontSize: 12 }}
-                  itemStyle={{ color: "hsl(210, 40%, 98%)" }}
+                  contentStyle={{ background: "white", border: "1px solid hsl(220, 13%, 87%)", borderRadius: 8, fontSize: 12 }}
+                  itemStyle={{ color: "hsl(222, 47%, 11%)" }}
                 />
               </PieChart>
             </ResponsiveContainer>

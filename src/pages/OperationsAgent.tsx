@@ -62,8 +62,8 @@ export default function OperationsAgent() {
                   <XAxis dataKey="hour" tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }} axisLine={false} tickLine={false} />
                   <Tooltip
-                    contentStyle={{ background: "hsl(222, 47%, 14%)", border: "1px solid hsl(217, 33%, 22%)", borderRadius: 8, fontSize: 12 }}
-                    itemStyle={{ color: "hsl(210, 40%, 98%)" }}
+                    contentStyle={{ background: "white", border: "1px solid hsl(220, 13%, 87%)", borderRadius: 8, fontSize: 12 }}
+                    itemStyle={{ color: "hsl(222, 47%, 11%)" }}
                   />
                   <Bar dataKey="orders" radius={[4, 4, 0, 0]}>
                     {opsData.hourlyForecast.map((entry, i) => (
