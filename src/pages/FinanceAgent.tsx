@@ -7,9 +7,11 @@ import { financeData } from "@/data/mockData";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Shield, CreditCard, TrendingUp } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function FinanceAgent() {
   const [fixApplied, setFixApplied] = useState<Set<string>>(new Set());
+  const [creditApplied, setCreditApplied] = useState(false);
 
   const plData = [
     { name: "Revenue", current: financeData.revenue.current / 1000, last: financeData.revenue.last / 1000, preNam: financeData.revenue.preNam / 1000 },
@@ -17,6 +19,13 @@ export default function FinanceAgent() {
     { name: "Gross Margin", current: financeData.grossMargin.current / 1000, last: financeData.grossMargin.last / 1000, preNam: financeData.grossMargin.preNam / 1000 },
     { name: "OpEx", current: financeData.opex.current / 1000, last: financeData.opex.last / 1000, preNam: financeData.opex.preNam / 1000 },
   ];
+
+  const handleFixAlert = (alertId: string, alertTitle: string, alertAction: string) => {
+    setFixApplied(prev => new Set(prev).add(alertId));
+    toast.success(`${alertAction}`, {
+      description: `"${alertTitle}" — fix has been applied. Agent will monitor impact over the next 48 hours.`,
+    });
+  };
 
   return (
     <div className="space-y-6 max-w-[1400px]">
@@ -96,11 +105,12 @@ export default function FinanceAgent() {
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Margin Alert Center</h2>
           {financeData.alerts.map(a => (
-            <Card key={a.id} className="bg-card border-border">
+            <Card key={a.id} className={`bg-card border-border ${fixApplied.has(a.id) ? "opacity-60" : ""}`}>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
-                  <PulseDot color={a.level} size="sm" />
+                  <PulseDot color={fixApplied.has(a.id) ? "success" : a.level} size="sm" />
                   <h3 className="text-sm font-semibold text-foreground">{a.title}</h3>
+                  {fixApplied.has(a.id) && <Badge className="bg-success/10 text-success border-0 text-xs">✓ Resolved</Badge>}
                 </div>
                 <p className="text-xs text-muted-foreground mb-2">{a.desc}</p>
                 {a.action && (
@@ -109,7 +119,7 @@ export default function FinanceAgent() {
                     variant={a.level === "destructive" ? "default" : "outline"}
                     className="h-6 text-xs"
                     disabled={fixApplied.has(a.id)}
-                    onClick={() => setFixApplied(prev => new Set(prev).add(a.id))}
+                    onClick={() => handleFixAlert(a.id, a.title, a.action!)}
                   >
                     {fixApplied.has(a.id) ? "✓ Applied" : a.action}
                   </Button>
@@ -132,7 +142,19 @@ export default function FinanceAgent() {
             <p className="text-xs text-muted-foreground">
               at {financeData.credit.rate}% annual <span className="text-success">(vs {financeData.credit.marketRate}% market)</span>
             </p>
-            <Button size="sm" className="h-8 text-xs w-full">Apply in 1 tap — no paperwork</Button>
+            <Button
+              size="sm"
+              className="h-8 text-xs w-full"
+              disabled={creditApplied}
+              onClick={() => {
+                setCreditApplied(true);
+                toast.success("Credit application submitted!", {
+                  description: `₹${financeData.credit.approved.toLocaleString()} credit line at ${financeData.credit.rate}% — approval expected within 24 hours.`,
+                });
+              }}
+            >
+              {creditApplied ? "✓ Application Submitted" : "Apply in 1 tap — no paperwork"}
+            </Button>
           </CardContent>
         </Card>
 

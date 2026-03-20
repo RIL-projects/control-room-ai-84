@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -6,11 +6,42 @@ import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
 import { growthData } from "@/data/mockData";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Users, Target, TrendingUp, AlertTriangle } from "lucide-react";
+import { Users, Target, TrendingUp, AlertTriangle, Pause, Play, Edit, Zap } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function GrowthAgent() {
   const [menuApproved, setMenuApproved] = useState(false);
+  const [campaignStates, setCampaignStates] = useState<Record<string, "running" | "paused" | "boosted">>({});
+  const [editingCampaign, setEditingCampaign] = useState<string | null>(null);
+
+  const togglePause = (name: string) => {
+    setCampaignStates(prev => {
+      const current = prev[name] || "running";
+      const next = current === "paused" ? "running" : "paused";
+      toast(next === "paused" ? "Campaign paused" : "Campaign resumed", {
+        description: `"${name}" is now ${next}.`,
+      });
+      return { ...prev, [name]: next };
+    });
+  };
+
+  const boostBudget = (name: string) => {
+    setCampaignStates(prev => {
+      toast.success("Budget boosted +50%", {
+        description: `"${name}" budget increased. Expected reach +40%.`,
+      });
+      return { ...prev, [name]: "boosted" };
+    });
+  };
+
+  const editAudience = (name: string) => {
+    setEditingCampaign(name);
+    toast.info("Audience editor opened", {
+      description: `Refining targeting for "${name}". Agent will re-optimize within 30 min.`,
+    });
+    setTimeout(() => setEditingCampaign(null), 3000);
+  };
 
   return (
     <div className="space-y-6 max-w-[1400px]">
@@ -86,35 +117,56 @@ export default function GrowthAgent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Active Campaigns</h2>
-          {growthData.campaigns.map(c => (
-            <Card key={c.name} className="bg-card border-border">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-foreground">{c.name}</h3>
-                  <Badge variant="outline" className="text-xs">{c.status}</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">{c.channel} · {c.target}</p>
-                <div className="grid grid-cols-4 gap-2 text-center">
-                  {[
-                    { l: "Reached", v: c.reached },
-                    { l: "Clicked", v: c.clicked },
-                    { l: "Ordered", v: c.ordered },
-                    { l: "ROI", v: `${c.roi}x` },
-                  ].map(m => (
-                    <div key={m.l}>
-                      <p className="text-xs text-muted-foreground">{m.l}</p>
-                      <p className="text-sm font-semibold text-foreground">{m.v}</p>
+          {growthData.campaigns.map(c => {
+            const state = campaignStates[c.name] || "running";
+            const isPaused = state === "paused";
+            const isBoosted = state === "boosted";
+            return (
+              <Card key={c.name} className={`bg-card border-border ${isPaused ? "opacity-60" : ""} ${editingCampaign === c.name ? "ring-2 ring-primary" : ""}`}>
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-foreground">{c.name}</h3>
+                    <div className="flex items-center gap-2">
+                      {isPaused && <Badge className="bg-warning/10 text-warning border-0 text-xs">Paused</Badge>}
+                      {isBoosted && <Badge className="bg-success/10 text-success border-0 text-xs">⚡ Boosted</Badge>}
+                      <Badge variant="outline" className="text-xs">{isPaused ? "Paused" : c.status}</Badge>
                     </div>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="h-6 text-xs">Pause</Button>
-                  <Button size="sm" variant="outline" className="h-6 text-xs">Edit Audience</Button>
-                  <Button size="sm" variant="default" className="h-6 text-xs">Boost Budget</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{c.channel} · {c.target}</p>
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    {[
+                      { l: "Reached", v: isBoosted ? Math.round(c.reached * 1.4) : c.reached },
+                      { l: "Clicked", v: c.clicked },
+                      { l: "Ordered", v: c.ordered },
+                      { l: "ROI", v: `${isBoosted ? (c.roi * 1.2).toFixed(1) : c.roi}x` },
+                    ].map(m => (
+                      <div key={m.l}>
+                        <p className="text-xs text-muted-foreground">{m.l}</p>
+                        <p className="text-sm font-semibold text-foreground">{m.v}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => togglePause(c.name)}>
+                      {isPaused ? <><Play className="w-3 h-3" /> Resume</> : <><Pause className="w-3 h-3" /> Pause</>}
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => editAudience(c.name)}>
+                      <Edit className="w-3 h-3" /> Edit Audience
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="h-6 text-xs gap-1"
+                      disabled={isBoosted}
+                      onClick={() => boostBudget(c.name)}
+                    >
+                      {isBoosted ? "✓ Boosted" : <><Zap className="w-3 h-3" /> Boost Budget</>}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         <div className="space-y-4">
@@ -159,10 +211,15 @@ export default function GrowthAgent() {
               <Button
                 size="sm"
                 disabled={menuApproved}
-                onClick={() => setMenuApproved(true)}
+                onClick={() => {
+                  setMenuApproved(true);
+                  toast.success("Menu addition approved", {
+                    description: "Operations agent will prepare costing and menu design for 'Mini Meals' category.",
+                  });
+                }}
                 className="h-7 text-xs"
               >
-                {menuApproved ? "✓ Approved" : "Approve Menu Addition"}
+                {menuApproved ? "✓ Approved — Ops notified" : "Approve Menu Addition"}
               </Button>
             </CardContent>
           </Card>

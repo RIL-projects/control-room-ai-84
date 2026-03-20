@@ -8,16 +8,18 @@ import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
 import { MiniSparkline } from "@/components/MiniSparkline";
 import { businessPulse, agents, activityFeed, priorities, snapshotMetrics, FeedEntry } from "@/data/mockData";
-import { Star, MapPin, Activity } from "lucide-react";
+import { Star, MapPin, Activity, Check, X, Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CommandCenter() {
   const navigate = useNavigate();
   const [visibleFeed, setVisibleFeed] = useState<FeedEntry[]>([]);
   const [feedIdx, setFeedIdx] = useState(0);
   const [approvedPriorities, setApprovedPriorities] = useState<Set<string>>(new Set());
+  const [dismissedPriorities, setDismissedPriorities] = useState<Set<string>>(new Set());
+  const [feedActions, setFeedActions] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Show first 3 immediately
     setVisibleFeed(activityFeed.slice(0, 3));
     setFeedIdx(3);
   }, []);
@@ -32,6 +34,41 @@ export default function CommandCenter() {
   }, [feedIdx]);
 
   const agentRoute: Record<string, string> = { growth: "/growth", ops: "/operations", finance: "/finance" };
+
+  const handleFeedAction = (entryId: string, action: string) => {
+    setFeedActions(prev => ({ ...prev, [entryId]: action }));
+    if (action === "approve") {
+      toast.success("Action approved", { description: "The agent will proceed with execution." });
+    } else if (action === "dismiss") {
+      toast("Action dismissed", { description: "This item has been removed from the queue." });
+    } else if (action === "edit") {
+      toast.info("Edit mode", { description: "Opening action details for editing..." });
+    }
+  };
+
+  const handlePriorityAction = (priorityId: string, action: string) => {
+    if (action === "Approve") {
+      setApprovedPriorities(prev => new Set(prev).add(priorityId));
+      toast.success("Priority approved", { description: "Agent will execute this action now." });
+    } else if (action === "Snooze") {
+      setDismissedPriorities(prev => new Set(prev).add(priorityId));
+      toast("Priority snoozed", { description: "This will reappear in 2 hours." });
+    } else if (action === "Dismiss") {
+      setDismissedPriorities(prev => new Set(prev).add(priorityId));
+      toast("Priority dismissed", { description: "Removed from today's list." });
+    } else if (action === "View") {
+      const priority = priorities.find(p => p.id === priorityId);
+      if (priority?.label.includes("Growth") || priority?.label.includes("Customer")) {
+        navigate("/growth");
+      } else if (priority?.label.includes("Ops") || priority?.label.includes("Operation")) {
+        navigate("/operations");
+      } else if (priority?.label.includes("Finance") || priority?.label.includes("Margin")) {
+        navigate("/finance");
+      } else {
+        navigate("/orchestration");
+      }
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-[1400px]">
@@ -79,34 +116,48 @@ export default function CommandCenter() {
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Live Agent Activity</h2>
           <div className="space-y-2 max-h-[420px] overflow-y-auto pr-2">
             <AnimatePresence initial={false}>
-              {visibleFeed.map(entry => (
-                <motion.div
-                  key={entry.id}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <Card className="bg-card border-border">
-                    <CardContent className="p-3 flex gap-3">
-                      <span className="text-xs text-muted-foreground shrink-0 w-16 pt-0.5">{entry.time}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <PulseDot color={entry.agentColor} size="sm" />
-                          <span className="text-xs font-semibold text-foreground">{entry.agent}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{entry.action}</p>
-                        {entry.hasActions && (
-                          <div className="flex gap-2 mt-2">
-                            <Button size="sm" variant="default" className="h-6 text-xs">Approve</Button>
-                            <Button size="sm" variant="outline" className="h-6 text-xs">Dismiss</Button>
-                            <Button size="sm" variant="outline" className="h-6 text-xs">Edit</Button>
+              {visibleFeed.map(entry => {
+                const entryAction = feedActions[entry.id];
+                return (
+                  <motion.div
+                    key={entry.id}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: entryAction === "dismiss" ? 0.4 : 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <Card className={`bg-card border-border ${entryAction === "dismiss" ? "opacity-50" : ""}`}>
+                      <CardContent className="p-3 flex gap-3">
+                        <span className="text-xs text-muted-foreground shrink-0 w-16 pt-0.5">{entry.time}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <PulseDot color={entry.agentColor} size="sm" />
+                            <span className="text-xs font-semibold text-foreground">{entry.agent}</span>
                           </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                          <p className="text-xs text-muted-foreground leading-relaxed">{entry.action}</p>
+                          {entry.hasActions && !entryAction && (
+                            <div className="flex gap-2 mt-2">
+                              <Button size="sm" variant="default" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "approve")}>
+                                <Check className="w-3 h-3" /> Approve
+                              </Button>
+                              <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "dismiss")}>
+                                <X className="w-3 h-3" /> Dismiss
+                              </Button>
+                              <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "edit")}>
+                                <Pencil className="w-3 h-3" /> Edit
+                              </Button>
+                            </div>
+                          )}
+                          {entryAction && (
+                            <Badge variant="outline" className="mt-2 text-xs capitalize">
+                              {entryAction === "approve" ? "✓ Approved" : entryAction === "dismiss" ? "Dismissed" : "✏ Editing..."}
+                            </Badge>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>
@@ -115,33 +166,36 @@ export default function CommandCenter() {
         <div className="lg:col-span-2 space-y-2">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Today's Priorities</h2>
           <div className="space-y-2">
-            {priorities.map(p => (
-              <Card key={p.id} className="bg-card border-border">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <PulseDot color={p.level} size="sm" />
-                    <Badge variant="outline" className="text-xs">{p.label}</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">{p.text}</p>
-                  <div className="flex gap-2">
-                    {p.actions.map(action => (
-                      <Button
-                        key={action}
-                        size="sm"
-                        variant={action === "Approve" ? "default" : "outline"}
-                        className="h-6 text-xs"
-                        onClick={() => {
-                          if (action === "Approve") setApprovedPriorities(prev => new Set(prev).add(p.id));
-                        }}
-                        disabled={approvedPriorities.has(p.id)}
-                      >
-                        {approvedPriorities.has(p.id) && action === "Approve" ? "✓ Done" : action}
-                      </Button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {priorities.map(p => {
+              const isDone = approvedPriorities.has(p.id) || dismissedPriorities.has(p.id);
+              return (
+                <Card key={p.id} className={`bg-card border-border transition-opacity ${dismissedPriorities.has(p.id) ? "opacity-40" : ""}`}>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <PulseDot color={p.level} size="sm" />
+                      <Badge variant="outline" className="text-xs">{p.label}</Badge>
+                      {approvedPriorities.has(p.id) && <Badge className="bg-success/10 text-success border-0 text-xs">✓ Done</Badge>}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">{p.text}</p>
+                    {!isDone && (
+                      <div className="flex gap-2">
+                        {p.actions.map(action => (
+                          <Button
+                            key={action}
+                            size="sm"
+                            variant={action === "Approve" ? "default" : "outline"}
+                            className="h-6 text-xs"
+                            onClick={() => handlePriorityAction(p.id, action)}
+                          >
+                            {action}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </div>

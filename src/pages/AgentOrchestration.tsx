@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { PulseDot } from "@/components/PulseDot";
 import { orchestrationNodes, decisionLog } from "@/data/mockData";
 import { Pause, Play, RotateCcw, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 
 type NodeStatus = "active" | "monitoring" | "queued";
 
@@ -31,15 +32,13 @@ interface PrimaryNode {
 const statusColor = (s: NodeStatus) =>
   s === "active" ? "success" : s === "monitoring" ? "warning" : "primary";
 
-const statusBorder = (s: NodeStatus) =>
-  s === "active" ? "border-success" : s === "monitoring" ? "border-warning" : "border-primary";
-
 export default function AgentOrchestration() {
   const [selected, setSelected] = useState<string | null>(null);
   const [autonomy, setAutonomy] = useState<Record<string, number>>({});
   const [spawning, setSpawning] = useState(false);
   const [spawnedNode, setSpawnedNode] = useState<SubagentNode | null>(null);
   const [spawnPhase, setSpawnPhase] = useState("");
+  const [pausedNodes, setPausedNodes] = useState<Set<string>>(new Set());
 
   const allNodes = orchestrationNodes.primary;
   const allSubagents = allNodes.flatMap(n => n.subagents);
@@ -48,6 +47,7 @@ export default function AgentOrchestration() {
   const handleSpawn = useCallback(() => {
     setSpawning(true);
     setSpawnPhase("Initializing...");
+    toast("Spawning new campaign subagent...");
     setTimeout(() => setSpawnPhase("Analyzing audience..."), 1200);
     setTimeout(() => setSpawnPhase("Creating campaign..."), 2400);
     setTimeout(() => {
@@ -60,9 +60,28 @@ export default function AgentOrchestration() {
         x: 150,
         y: 160,
       });
+      toast.success("Campaign subagent is live!", { description: "Now targeting high-intent audiences in your area." });
     }, 3600);
     setTimeout(() => setSpawning(false), 5000);
   }, []);
+
+  const handlePause = (nodeId: string, nodeName: string) => {
+    setPausedNodes(prev => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+        toast.success(`${nodeName} resumed`, { description: "Agent is back online and processing." });
+      } else {
+        next.add(nodeId);
+        toast(`${nodeName} paused`, { description: "Agent will hold all actions until resumed." });
+      }
+      return next;
+    });
+  };
+
+  const handleRestart = (nodeName: string) => {
+    toast.success(`${nodeName} restarting`, { description: "Clearing cache and re-initializing. This takes ~10 seconds." });
+  };
 
   const autonomyLabel = (v: number) => v < 33 ? "Manual" : v < 66 ? "Suggest" : "Full Auto";
 
@@ -73,8 +92,8 @@ export default function AgentOrchestration() {
           <h1 className="text-xl font-semibold text-foreground">Agent Orchestration Center</h1>
           <p className="text-sm text-muted-foreground">Visualize and control your AI agent ecosystem</p>
         </div>
-        <Button onClick={handleSpawn} disabled={spawning} className="gap-2">
-          {spawning ? spawnPhase : "Launch New Campaign"}
+        <Button onClick={handleSpawn} disabled={spawning || !!spawnedNode} className="gap-2">
+          {spawning ? spawnPhase : spawnedNode ? "✓ Campaign Launched" : "Launch New Campaign"}
         </Button>
       </div>
 
@@ -84,7 +103,6 @@ export default function AgentOrchestration() {
           <Card className="bg-card border-border overflow-hidden">
             <CardContent className="p-0">
               <svg viewBox="0 0 800 650" className="w-full h-auto" style={{ minHeight: 400 }}>
-                {/* Connection lines */}
                 {allNodes.map(primary =>
                   primary.subagents.map(sub => (
                     <g key={`line-${primary.id}-${sub.id}`}>
@@ -106,7 +124,6 @@ export default function AgentOrchestration() {
                   ))
                 )}
 
-                {/* Spawned node connection */}
                 {spawnedNode && (
                   <g>
                     <line
@@ -119,7 +136,6 @@ export default function AgentOrchestration() {
                   </g>
                 )}
 
-                {/* Primary nodes */}
                 {allNodes.map(node => (
                   <g
                     key={node.id}
@@ -129,17 +145,19 @@ export default function AgentOrchestration() {
                     <circle
                       cx={node.x} cy={node.y}
                       r={40}
-                      fill="hsl(0, 0%, 100%)"
-                      stroke={node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"}
+                      fill={pausedNodes.has(node.id) ? "hsl(0, 0%, 96%)" : "hsl(0, 0%, 100%)"}
+                      stroke={pausedNodes.has(node.id) ? "hsl(215, 20%, 65%)" : node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"}
                       strokeWidth={selected === node.id ? 3 : 2}
                       filter="url(#nodeShadow)"
                     >
-                      <animate
-                        attributeName="stroke-opacity"
-                        values="1;0.4;1"
-                        dur="2s"
-                        repeatCount="indefinite"
-                      />
+                      {!pausedNodes.has(node.id) && (
+                        <animate
+                          attributeName="stroke-opacity"
+                          values="1;0.4;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      )}
                     </circle>
                     <text
                       x={node.x} y={node.y - 4}
@@ -159,10 +177,12 @@ export default function AgentOrchestration() {
                     >
                       {node.name.split(" ").slice(2).join(" ")}
                     </text>
+                    {pausedNodes.has(node.id) && (
+                      <text x={node.x} y={node.y + 22} textAnchor="middle" fill="hsl(38, 92%, 50%)" fontSize={7}>⏸ Paused</text>
+                    )}
                   </g>
                 ))}
 
-                {/* Subagent nodes */}
                 {allNodes.map(primary =>
                   primary.subagents.map(sub => (
                     <g
@@ -189,7 +209,6 @@ export default function AgentOrchestration() {
                   ))
                 )}
 
-                {/* Spawned node */}
                 <AnimatePresence>
                   {spawnedNode && (
                     <motion.g
@@ -216,7 +235,6 @@ export default function AgentOrchestration() {
                   )}
                 </AnimatePresence>
 
-                {/* Shadow filter */}
                 <defs>
                   <filter id="nodeShadow" x="-10%" y="-10%" width="120%" height="130%">
                     <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="hsl(220, 13%, 70%)" floodOpacity="0.3" />
@@ -235,10 +253,12 @@ export default function AgentOrchestration() {
                 <>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <PulseDot color={statusColor(selectedNode.status)} />
+                      <PulseDot color={pausedNodes.has(selectedNode.id) ? "warning" : statusColor(selectedNode.status)} />
                       <h3 className="text-sm font-semibold text-foreground">{selectedNode.name}</h3>
                     </div>
-                    <Badge variant="outline" className="text-xs capitalize">{selectedNode.status}</Badge>
+                    <Badge variant="outline" className="text-xs capitalize">
+                      {pausedNodes.has(selectedNode.id) ? "paused" : selectedNode.status}
+                    </Badge>
                   </div>
 
                   {"task" in selectedNode && (
@@ -252,7 +272,14 @@ export default function AgentOrchestration() {
                     <p className="text-xs text-muted-foreground mb-2">Autonomy Level</p>
                     <Slider
                       value={[autonomy[selectedNode.id] ?? 80]}
-                      onValueChange={([v]) => setAutonomy(prev => ({ ...prev, [selectedNode.id]: v }))}
+                      onValueChange={([v]) => {
+                        setAutonomy(prev => ({ ...prev, [selectedNode.id]: v }));
+                      }}
+                      onValueCommit={([v]) => {
+                        toast(`Autonomy set to ${autonomyLabel(v)}`, {
+                          description: v < 33 ? "Agent will wait for your approval on all actions." : v < 66 ? "Agent will suggest actions for your review." : "Agent operates independently with full authority.",
+                        });
+                      }}
                       max={100}
                       step={1}
                     />
@@ -273,8 +300,22 @@ export default function AgentOrchestration() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1"><Pause className="w-3 h-3" /> Pause</Button>
-                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1"><RotateCcw className="w-3 h-3" /> Restart</Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => handlePause(selectedNode.id, selectedNode.name)}
+                    >
+                      {pausedNodes.has(selectedNode.id) ? <><Play className="w-3 h-3" /> Resume</> : <><Pause className="w-3 h-3" /> Pause</>}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => handleRestart(selectedNode.name)}
+                    >
+                      <RotateCcw className="w-3 h-3" /> Restart
+                    </Button>
                   </div>
                 </>
               ) : (
@@ -291,7 +332,7 @@ export default function AgentOrchestration() {
       {/* Summary Bar */}
       <div className="grid grid-cols-5 gap-4">
         {[
-          { label: "Active Agents", value: "3" },
+          { label: "Active Agents", value: `${3 - pausedNodes.size}` },
           { label: "Subagents Running", value: spawnedNode ? "8" : "7" },
           { label: "Actions Today", value: "34" },
           { label: "Value Created", value: "₹12,400" },
