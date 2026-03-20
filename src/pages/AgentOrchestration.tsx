@@ -130,7 +130,7 @@ export default function AgentOrchestration() {
                     <circle
                       cx={node.x} cy={node.y}
                       r={40}
-                      fill="hsl(222, 47%, 14%)"
+                      fill="hsl(0, 0%, 100%)"
                       stroke={node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"}
                       strokeWidth={selected === node.id ? 3 : 2}
                     >
