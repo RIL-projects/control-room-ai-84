@@ -130,8 +130,8 @@ export default function AgentOrchestration() {
                     <circle
                       cx={node.x} cy={node.y}
                       r={40}
-                      fill="hsl(222, 47%, 14%)"
-                      stroke={node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"}
+                      fill="hsl(0, 0%, 100%)"
+                      stroke={node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"} className="drop-shadow-sm"
                       strokeWidth={selected === node.id ? 3 : 2}
                     >
                       <animate
@@ -144,7 +144,7 @@ export default function AgentOrchestration() {
                     <text
                       x={node.x} y={node.y - 4}
                       textAnchor="middle"
-                      fill="hsl(210, 40%, 98%)"
+                        fill="hsl(0, 0%, 100%)"
                       fontSize={9}
                       fontWeight="600"
                     >
@@ -153,7 +153,7 @@ export default function AgentOrchestration() {
                     <text
                       x={node.x} y={node.y + 10}
                       textAnchor="middle"
-                      fill="hsl(210, 40%, 98%)"
+                        fill="hsl(0, 0%, 100%)"
                       fontSize={9}
                       fontWeight="600"
                     >
@@ -178,7 +178,7 @@ export default function AgentOrchestration() {
                         stroke={sub.status === "active" ? "hsl(160, 84%, 39%)" : sub.status === "queued" ? "hsl(213, 58%, 45%)" : "hsl(38, 92%, 50%)"}
                         strokeWidth={selected === sub.id ? 2 : 1}
                       />
-                      <text x={sub.x} y={sub.y - 8} textAnchor="middle" fill="hsl(210, 40%, 98%)" fontSize={8} fontWeight="500">
+                      <text x={sub.x} y={sub.y - 8} textAnchor="middle" fill="hsl(222, 47%, 11%)" fontSize={8} fontWeight="500">
                         {sub.name}
                       </text>
                       <text x={sub.x} y={sub.y + 6} textAnchor="middle" fill="hsl(215, 20%, 55%)" fontSize={7}>
@@ -204,7 +204,7 @@ export default function AgentOrchestration() {
                         stroke="hsl(160, 84%, 39%)"
                         strokeWidth={2}
                       />
-                      <text x={spawnedNode.x} y={spawnedNode.y - 8} textAnchor="middle" fill="hsl(210, 40%, 98%)" fontSize={8} fontWeight="500">
+                      <text x={spawnedNode.x} y={spawnedNode.y - 8} textAnchor="middle" fill="hsl(222, 47%, 11%)" fontSize={8} fontWeight="500">
                         {spawnedNode.name}
                       </text>
                       <text x={spawnedNode.x} y={spawnedNode.y + 6} textAnchor="middle" fill="hsl(160, 84%, 39%)" fontSize={7}>
