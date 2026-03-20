@@ -91,11 +91,10 @@ export default function AgentOrchestration() {
                       <line
                         x1={primary.x} y1={primary.y + 30}
                         x2={sub.x} y2={sub.y - 20}
-                        stroke="hsl(213, 58%, 30%)"
+                        stroke="hsl(213, 58%, 75%)"
                         strokeWidth={1.5}
                         strokeDasharray="4 4"
                       />
-                      {/* Flowing dot */}
                       <circle r="3" fill="hsl(213, 58%, 45%)">
                         <animateMotion
                           dur="3s"
@@ -113,7 +112,7 @@ export default function AgentOrchestration() {
                     <line
                       x1={allNodes[0].x} y1={allNodes[0].y + 30}
                       x2={spawnedNode.x} y2={spawnedNode.y - 20}
-                      stroke="hsl(213, 58%, 30%)"
+                      stroke="hsl(213, 58%, 75%)"
                       strokeWidth={1.5}
                       strokeDasharray="4 4"
                     />
@@ -131,8 +130,9 @@ export default function AgentOrchestration() {
                       cx={node.x} cy={node.y}
                       r={40}
                       fill="hsl(0, 0%, 100%)"
-                      stroke={node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"} className="drop-shadow-sm"
+                      stroke={node.status === "active" ? "hsl(160, 84%, 39%)" : "hsl(38, 92%, 50%)"}
                       strokeWidth={selected === node.id ? 3 : 2}
+                      filter="url(#nodeShadow)"
                     >
                       <animate
                         attributeName="stroke-opacity"
@@ -144,7 +144,7 @@ export default function AgentOrchestration() {
                     <text
                       x={node.x} y={node.y - 4}
                       textAnchor="middle"
-                        fill="hsl(0, 0%, 100%)"
+                      fill="hsl(222, 47%, 11%)"
                       fontSize={9}
                       fontWeight="600"
                     >
@@ -153,7 +153,7 @@ export default function AgentOrchestration() {
                     <text
                       x={node.x} y={node.y + 10}
                       textAnchor="middle"
-                        fill="hsl(0, 0%, 100%)"
+                      fill="hsl(222, 47%, 11%)"
                       fontSize={9}
                       fontWeight="600"
                     >
@@ -174,14 +174,15 @@ export default function AgentOrchestration() {
                         x={sub.x - 60} y={sub.y - 25}
                         width={120} height={50}
                         rx={8}
-                        fill="hsl(222, 47%, 11%)"
+                        fill="hsl(0, 0%, 100%)"
                         stroke={sub.status === "active" ? "hsl(160, 84%, 39%)" : sub.status === "queued" ? "hsl(213, 58%, 45%)" : "hsl(38, 92%, 50%)"}
                         strokeWidth={selected === sub.id ? 2 : 1}
+                        filter="url(#nodeShadow)"
                       />
                       <text x={sub.x} y={sub.y - 8} textAnchor="middle" fill="hsl(222, 47%, 11%)" fontSize={8} fontWeight="500">
                         {sub.name}
                       </text>
-                      <text x={sub.x} y={sub.y + 6} textAnchor="middle" fill="hsl(215, 20%, 55%)" fontSize={7}>
+                      <text x={sub.x} y={sub.y + 6} textAnchor="middle" fill="hsl(215, 16%, 47%)" fontSize={7}>
                         {sub.status === "active" ? "🟢" : sub.status === "queued" ? "🔵" : "🟡"} {sub.status}
                       </text>
                     </g>
@@ -200,9 +201,10 @@ export default function AgentOrchestration() {
                         x={spawnedNode.x - 60} y={spawnedNode.y - 25}
                         width={120} height={50}
                         rx={8}
-                        fill="hsl(222, 47%, 11%)"
+                        fill="hsl(0, 0%, 100%)"
                         stroke="hsl(160, 84%, 39%)"
                         strokeWidth={2}
+                        filter="url(#nodeShadow)"
                       />
                       <text x={spawnedNode.x} y={spawnedNode.y - 8} textAnchor="middle" fill="hsl(222, 47%, 11%)" fontSize={8} fontWeight="500">
                         {spawnedNode.name}
@@ -213,6 +215,13 @@ export default function AgentOrchestration() {
                     </motion.g>
                   )}
                 </AnimatePresence>
+
+                {/* Shadow filter */}
+                <defs>
+                  <filter id="nodeShadow" x="-10%" y="-10%" width="120%" height="130%">
+                    <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="hsl(220, 13%, 70%)" floodOpacity="0.3" />
+                  </filter>
+                </defs>
               </svg>
             </CardContent>
           </Card>
