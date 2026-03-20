@@ -204,7 +204,7 @@ export default function AgentOrchestration() {
                         stroke="hsl(160, 84%, 39%)"
                         strokeWidth={2}
                       />
-                      <text x={spawnedNode.x} y={spawnedNode.y - 8} textAnchor="middle" fill="hsl(210, 40%, 98%)" fontSize={8} fontWeight="500">
+                      <text x={spawnedNode.x} y={spawnedNode.y - 8} textAnchor="middle" fill="hsl(222, 47%, 11%)" fontSize={8} fontWeight="500">
                         {spawnedNode.name}
                       </text>
                       <text x={spawnedNode.x} y={spawnedNode.y + 6} textAnchor="middle" fill="hsl(160, 84%, 39%)" fontSize={7}>
