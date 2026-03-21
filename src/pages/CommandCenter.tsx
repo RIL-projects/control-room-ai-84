@@ -37,14 +37,16 @@ export default function CommandCenter() {
 
   const agentRoute: Record<string, string> = { growth: "/growth", ops: "/operations", finance: "/finance" };
 
-  const handleFeedAction = (entryId: string, action: string) => {
+  const handleFeedAction = (entryId: string, action: string, entry?: FeedEntry) => {
+    if (action === "edit" && entry) {
+      setEditingEntry(entry);
+      return;
+    }
     setFeedActions(prev => ({ ...prev, [entryId]: action }));
     if (action === "approve") {
       toast.success("Action approved", { description: "The agent will proceed with execution." });
     } else if (action === "dismiss") {
       toast("Action dismissed", { description: "This item has been removed from the queue." });
-    } else if (action === "edit") {
-      toast.info("Edit mode", { description: "Opening action details for editing..." });
     }
   };
 
