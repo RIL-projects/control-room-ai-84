@@ -146,7 +146,7 @@ export default function CommandCenter() {
                               <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "dismiss")}>
                                 <X className="w-3 h-3" /> Dismiss
                               </Button>
-                              <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "edit")}>
+                              <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "edit", entry)}>
                                 <Pencil className="w-3 h-3" /> Edit
                               </Button>
                             </div>
