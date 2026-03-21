@@ -138,14 +138,18 @@ export default function CommandCenter() {
                             <span className="text-xs font-semibold text-foreground">{entry.agent}</span>
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed">{entry.action}</p>
-                          {entry.hasActions && !entryAction && (
+                          {!entryAction && (
                             <div className="flex gap-2 mt-2">
-                              <Button size="sm" variant="default" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "approve")}>
-                                <Check className="w-3 h-3" /> Approve
-                              </Button>
-                              <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "dismiss")}>
-                                <X className="w-3 h-3" /> Dismiss
-                              </Button>
+                              {entry.hasActions && (
+                                <>
+                                  <Button size="sm" variant="default" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "approve")}>
+                                    <Check className="w-3 h-3" /> Approve
+                                  </Button>
+                                  <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "dismiss")}>
+                                    <X className="w-3 h-3" /> Dismiss
+                                  </Button>
+                                </>
+                              )}
                               <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "edit", entry)}>
                                 <Pencil className="w-3 h-3" /> Edit
                               </Button>
@@ -153,7 +157,7 @@ export default function CommandCenter() {
                           )}
                           {entryAction && (
                             <Badge variant="outline" className="mt-2 text-xs capitalize">
-                              {entryAction === "approve" ? "✓ Approved" : entryAction === "dismiss" ? "Dismissed" : "✏ Editing..."}
+                              {entryAction === "approve" ? "✓ Approved" : entryAction === "dismiss" ? "Dismissed" : "✏ Updated"}
                             </Badge>
                           )}
                         </div>
