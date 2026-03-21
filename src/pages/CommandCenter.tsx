@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
 import { MiniSparkline } from "@/components/MiniSparkline";
+import { FeedEditDialog } from "@/components/FeedEditDialog";
 import { businessPulse, agents, activityFeed, priorities, snapshotMetrics, FeedEntry } from "@/data/mockData";
 import { Star, MapPin, Activity, Check, X, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ export default function CommandCenter() {
   const [approvedPriorities, setApprovedPriorities] = useState<Set<string>>(new Set());
   const [dismissedPriorities, setDismissedPriorities] = useState<Set<string>>(new Set());
   const [feedActions, setFeedActions] = useState<Record<string, string>>({});
+  const [editingEntry, setEditingEntry] = useState<FeedEntry | null>(null);
 
   useEffect(() => {
     setVisibleFeed(activityFeed.slice(0, 3));
@@ -35,14 +37,16 @@ export default function CommandCenter() {
 
   const agentRoute: Record<string, string> = { growth: "/growth", ops: "/operations", finance: "/finance" };
 
-  const handleFeedAction = (entryId: string, action: string) => {
+  const handleFeedAction = (entryId: string, action: string, entry?: FeedEntry) => {
+    if (action === "edit" && entry) {
+      setEditingEntry(entry);
+      return;
+    }
     setFeedActions(prev => ({ ...prev, [entryId]: action }));
     if (action === "approve") {
       toast.success("Action approved", { description: "The agent will proceed with execution." });
     } else if (action === "dismiss") {
       toast("Action dismissed", { description: "This item has been removed from the queue." });
-    } else if (action === "edit") {
-      toast.info("Edit mode", { description: "Opening action details for editing..." });
     }
   };
 
@@ -134,22 +138,26 @@ export default function CommandCenter() {
                             <span className="text-xs font-semibold text-foreground">{entry.agent}</span>
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed">{entry.action}</p>
-                          {entry.hasActions && !entryAction && (
+                          {!entryAction && (
                             <div className="flex gap-2 mt-2">
-                              <Button size="sm" variant="default" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "approve")}>
-                                <Check className="w-3 h-3" /> Approve
-                              </Button>
-                              <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "dismiss")}>
-                                <X className="w-3 h-3" /> Dismiss
-                              </Button>
-                              <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "edit")}>
+                              {entry.hasActions && (
+                                <>
+                                  <Button size="sm" variant="default" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "approve")}>
+                                    <Check className="w-3 h-3" /> Approve
+                                  </Button>
+                                  <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "dismiss")}>
+                                    <X className="w-3 h-3" /> Dismiss
+                                  </Button>
+                                </>
+                              )}
+                              <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => handleFeedAction(entry.id, "edit", entry)}>
                                 <Pencil className="w-3 h-3" /> Edit
                               </Button>
                             </div>
                           )}
                           {entryAction && (
                             <Badge variant="outline" className="mt-2 text-xs capitalize">
-                              {entryAction === "approve" ? "✓ Approved" : entryAction === "dismiss" ? "Dismissed" : "✏ Editing..."}
+                              {entryAction === "approve" ? "✓ Approved" : entryAction === "dismiss" ? "Dismissed" : "✏ Updated"}
                             </Badge>
                           )}
                         </div>
@@ -220,6 +228,12 @@ export default function CommandCenter() {
           </Card>
         ))}
       </div>
+      <FeedEditDialog
+        entry={editingEntry}
+        open={!!editingEntry}
+        onClose={() => setEditingEntry(null)}
+        onSubmit={(entryId) => setFeedActions(prev => ({ ...prev, [entryId]: "edit" }))}
+      />
     </div>
   );
 }
