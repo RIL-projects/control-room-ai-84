@@ -223,6 +223,12 @@ export default function CommandCenter() {
           </Card>
         ))}
       </div>
+      <FeedEditDialog
+        entry={editingEntry}
+        open={!!editingEntry}
+        onClose={() => setEditingEntry(null)}
+        onSubmit={(entryId) => setFeedActions(prev => ({ ...prev, [entryId]: "edit" }))}
+      />
     </div>
   );
 }
