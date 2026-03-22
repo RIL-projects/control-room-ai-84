@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
+import { EditAudienceDialog, BoostBudgetDialog } from "@/components/CampaignDialogs";
 import { growthData } from "@/data/mockData";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Users, Target, TrendingUp, AlertTriangle, Pause, Play, Edit, Zap } from "lucide-react";
@@ -13,7 +14,8 @@ import { toast } from "sonner";
 export default function GrowthAgent() {
   const [menuApproved, setMenuApproved] = useState(false);
   const [campaignStates, setCampaignStates] = useState<Record<string, "running" | "paused" | "boosted">>({});
-  const [editingCampaign, setEditingCampaign] = useState<string | null>(null);
+  const [editAudienceCampaign, setEditAudienceCampaign] = useState<typeof growthData.campaigns[0] | null>(null);
+  const [boostCampaign, setBoostCampaign] = useState<typeof growthData.campaigns[0] | null>(null);
 
   const togglePause = (name: string) => {
     setCampaignStates(prev => {
@@ -27,20 +29,11 @@ export default function GrowthAgent() {
   };
 
   const boostBudget = (name: string) => {
-    setCampaignStates(prev => {
-      toast.success("Budget boosted +50%", {
-        description: `"${name}" budget increased. Expected reach +40%.`,
-      });
-      return { ...prev, [name]: "boosted" };
-    });
+    setCampaignStates(prev => ({ ...prev, [name]: "boosted" }));
   };
 
   const editAudience = (name: string) => {
-    setEditingCampaign(name);
-    toast.info("Audience editor opened", {
-      description: `Refining targeting for "${name}". Agent will re-optimize within 30 min.`,
-    });
-    setTimeout(() => setEditingCampaign(null), 3000);
+    // handled by dialog now — state update on submit
   };
 
   return (
@@ -122,7 +115,7 @@ export default function GrowthAgent() {
             const isPaused = state === "paused";
             const isBoosted = state === "boosted";
             return (
-              <Card key={c.name} className={`bg-card border-border ${isPaused ? "opacity-60" : ""} ${editingCampaign === c.name ? "ring-2 ring-primary" : ""}`}>
+              <Card key={c.name} className={`bg-card border-border ${isPaused ? "opacity-60" : ""}`}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-foreground">{c.name}</h3>
@@ -150,7 +143,7 @@ export default function GrowthAgent() {
                     <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => togglePause(c.name)}>
                       {isPaused ? <><Play className="w-3 h-3" /> Resume</> : <><Pause className="w-3 h-3" /> Pause</>}
                     </Button>
-                    <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => editAudience(c.name)}>
+                    <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => setEditAudienceCampaign(c)}>
                       <Edit className="w-3 h-3" /> Edit Audience
                     </Button>
                     <Button
@@ -158,7 +151,7 @@ export default function GrowthAgent() {
                       variant="default"
                       className="h-6 text-xs gap-1"
                       disabled={isBoosted}
-                      onClick={() => boostBudget(c.name)}
+                      onClick={() => setBoostCampaign(c)}
                     >
                       {isBoosted ? "✓ Boosted" : <><Zap className="w-3 h-3" /> Boost Budget</>}
                     </Button>
@@ -246,6 +239,18 @@ export default function GrowthAgent() {
           </Card>
         </div>
       </div>
+      <EditAudienceDialog
+        campaign={editAudienceCampaign}
+        open={!!editAudienceCampaign}
+        onClose={() => setEditAudienceCampaign(null)}
+        onSubmit={() => {}}
+      />
+      <BoostBudgetDialog
+        campaign={boostCampaign}
+        open={!!boostCampaign}
+        onClose={() => setBoostCampaign(null)}
+        onSubmit={(name) => boostBudget(name)}
+      />
     </div>
   );
 }
