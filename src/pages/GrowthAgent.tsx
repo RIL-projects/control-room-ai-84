@@ -205,15 +205,11 @@ export default function GrowthAgent() {
               <Button
                 size="sm"
                 disabled={menuApproved}
-                onClick={() => {
-                  setMenuApproved(true);
-                  toast.success("Menu addition approved", {
-                    description: "Operations agent will prepare costing and menu design for 'Mini Meals' category.",
-                  });
-                }}
+                onClick={() => setMenuDialogOpen(true)}
                 className="h-7 text-xs"
               >
                 {menuApproved ? "✓ Approved — Ops notified" : "Approve Menu Addition"}
+              </Button>
               </Button>
             </CardContent>
           </Card>
