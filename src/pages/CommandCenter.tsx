@@ -61,8 +61,14 @@ export default function CommandCenter() {
       setDismissedPriorities(prev => new Set(prev).add(priorityId));
       toast("Priority snoozed", { description: "This will reappear in 2 hours." });
     } else if (action === "Dismiss") {
-      setDismissedPriorities(prev => new Set(prev).add(priorityId));
-      toast("Priority dismissed", { description: "Removed from today's list." });
+      const priority = priorities.find(p => p.id === priorityId);
+      if (priority) setDismissPriority(priority);
+    } else if (action === "Modify") {
+      const priority = priorities.find(p => p.id === priorityId);
+      if (priority) setModifyPriority(priority);
+    } else if (action === "View Details") {
+      const priority = priorities.find(p => p.id === priorityId);
+      if (priority) setViewPriority(priority);
     } else if (action === "View") {
       const priority = priorities.find(p => p.id === priorityId);
       if (priority?.label.includes("Growth") || priority?.label.includes("Customer")) {
