@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 export default function GrowthAgent() {
   const [menuApproved, setMenuApproved] = useState(false);
+  const [menuDialogOpen, setMenuDialogOpen] = useState(false);
   const [campaignStates, setCampaignStates] = useState<Record<string, "running" | "paused" | "boosted">>({});
   const [editAudienceCampaign, setEditAudienceCampaign] = useState<typeof growthData.campaigns[0] | null>(null);
   const [boostCampaign, setBoostCampaign] = useState<typeof growthData.campaigns[0] | null>(null);
