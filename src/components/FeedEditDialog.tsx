@@ -9,7 +9,134 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { FeedEntry } from "@/data/mockData";
 
-// ... keep existing code (interfaces and getEditConfig function stay the same)
+interface FeedEditDialogProps {
+  entry: FeedEntry | null;
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (entryId: string) => void;
+}
+
+interface EditConfig {
+  title: string;
+  description: string;
+  fields: FieldConfig[];
+}
+
+interface FieldConfig {
+  id: string;
+  label: string;
+  type: "input" | "select" | "textarea";
+  defaultValue: string;
+  options?: { label: string; value: string }[];
+  prefix?: string;
+}
+
+function getEditConfig(entry: FeedEntry): EditConfig {
+  const action = entry.action.toLowerCase();
+
+  if (action.includes("margin") && action.includes("paneer")) {
+    return {
+      title: "Edit Margin Alert — Paneer Butter Masala",
+      description: "Current margin is 8%. Agent recommends raising price by ₹15 or switching supplier.",
+      fields: [
+        { id: "action_type", label: "Recommended Action", type: "select", defaultValue: "raise_price", options: [
+          { label: "Raise menu price", value: "raise_price" },
+          { label: "Switch supplier", value: "switch_supplier" },
+          { label: "Reduce portion size", value: "reduce_portion" },
+          { label: "Remove from menu", value: "remove" },
+        ]},
+        { id: "price_adjustment", label: "Price Adjustment", type: "input", defaultValue: "15", prefix: "₹" },
+        { id: "target_margin", label: "Target Margin (%)", type: "input", defaultValue: "18" },
+        { id: "notes", label: "Notes for Agent", type: "textarea", defaultValue: "Apply from tomorrow's menu update." },
+      ],
+    };
+  }
+
+  if (action.includes("campaign") || action.includes("biryani")) {
+    return {
+      title: "Edit Campaign — Weekend Biryani Blast",
+      description: "Modify campaign parameters before the agent proceeds.",
+      fields: [
+        { id: "audience_radius", label: "Target Radius (km)", type: "input", defaultValue: "3" },
+        { id: "audience_size", label: "Target Audience Size", type: "input", defaultValue: "800" },
+        { id: "channel", label: "Channel", type: "select", defaultValue: "jio_bharatiq", options: [
+          { label: "Jio Push + BharatIQ", value: "jio_bharatiq" },
+          { label: "Jio Push Only", value: "jio" },
+          { label: "WhatsApp Broadcast", value: "whatsapp" },
+          { label: "All Channels", value: "all" },
+        ]},
+        { id: "budget", label: "Campaign Budget", type: "input", defaultValue: "2000", prefix: "₹" },
+        { id: "notes", label: "Additional Instructions", type: "textarea", defaultValue: "" },
+      ],
+    };
+  }
+
+  if (action.includes("inventory") || action.includes("auto-ordered") || action.includes("rice")) {
+    return {
+      title: "Edit Procurement Order",
+      description: "Modify the auto-procurement details before confirmation.",
+      fields: [
+        { id: "quantity", label: "Quantity (kg)", type: "input", defaultValue: "15" },
+        { id: "supplier", label: "Supplier", type: "select", defaultValue: "reliance", options: [
+          { label: "Reliance B2B", value: "reliance" },
+          { label: "Local Wholesaler", value: "local" },
+          { label: "BigBasket B2B", value: "bigbasket" },
+        ]},
+        { id: "max_price", label: "Max Price per kg", type: "input", defaultValue: "150", prefix: "₹" },
+        { id: "delivery_date", label: "Delivery Date", type: "input", defaultValue: "Tomorrow, 6 AM" },
+        { id: "notes", label: "Special Instructions", type: "textarea", defaultValue: "" },
+      ],
+    };
+  }
+
+  if (action.includes("loyalty") || action.includes("comeback")) {
+    return {
+      title: "Edit Loyalty Campaign",
+      description: "Modify comeback offer parameters for at-risk customers.",
+      fields: [
+        { id: "offer_amount", label: "Offer Amount", type: "input", defaultValue: "100", prefix: "₹" },
+        { id: "min_order", label: "Minimum Order Value", type: "input", defaultValue: "300", prefix: "₹" },
+        { id: "validity", label: "Offer Validity", type: "select", defaultValue: "7", options: [
+          { label: "3 days", value: "3" },
+          { label: "7 days", value: "7" },
+          { label: "14 days", value: "14" },
+          { label: "30 days", value: "30" },
+        ]},
+        { id: "message", label: "Custom Message", type: "textarea", defaultValue: "We miss you at Ravi's Kitchen! Here's a special offer just for you." },
+      ],
+    };
+  }
+
+  if (action.includes("forecast") || action.includes("demand")) {
+    return {
+      title: "Edit Demand Forecast Parameters",
+      description: "Adjust forecast settings for the operations agent.",
+      fields: [
+        { id: "surge_threshold", label: "Surge Alert Threshold (%)", type: "input", defaultValue: "30" },
+        { id: "prep_lead_time", label: "Prep Lead Time (hours)", type: "input", defaultValue: "4" },
+        { id: "notify_staff", label: "Staff Notification", type: "select", defaultValue: "auto", options: [
+          { label: "Auto-notify", value: "auto" },
+          { label: "Notify me first", value: "manual" },
+          { label: "Don't notify", value: "none" },
+        ]},
+        { id: "notes", label: "Additional Notes", type: "textarea", defaultValue: "" },
+      ],
+    };
+  }
+
+  return {
+    title: "Edit Agent Action",
+    description: entry.action,
+    fields: [
+      { id: "priority", label: "Priority", type: "select", defaultValue: "normal", options: [
+        { label: "High", value: "high" },
+        { label: "Normal", value: "normal" },
+        { label: "Low", value: "low" },
+      ]},
+      { id: "notes", label: "Notes / Instructions", type: "textarea", defaultValue: "" },
+    ],
+  };
+}
 
 export function FeedEditDialog({ entry, open, onClose, onSubmit }: FeedEditDialogProps) {
   const [values, setValues] = useState<Record<string, string>>({});
@@ -61,7 +188,7 @@ export function FeedEditDialog({ entry, open, onClose, onSubmit }: FeedEditDialo
                   )}
                   <Input
                     id={field.id}
-                    value={values[field.id]}
+                    value={values[field.id] ?? ""}
                     onChange={e => handleChange(field.id, e.target.value)}
                     className={`h-9 text-sm ${field.prefix ? "pl-7" : ""}`}
                   />
@@ -84,7 +211,7 @@ export function FeedEditDialog({ entry, open, onClose, onSubmit }: FeedEditDialo
               {field.type === "textarea" && (
                 <Textarea
                   id={field.id}
-                  value={values[field.id]}
+                  value={values[field.id] ?? ""}
                   onChange={e => handleChange(field.id, e.target.value)}
                   className="text-sm min-h-[60px]"
                   rows={2}
