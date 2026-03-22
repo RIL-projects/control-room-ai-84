@@ -29,20 +29,11 @@ export default function GrowthAgent() {
   };
 
   const boostBudget = (name: string) => {
-    setCampaignStates(prev => {
-      toast.success("Budget boosted +50%", {
-        description: `"${name}" budget increased. Expected reach +40%.`,
-      });
-      return { ...prev, [name]: "boosted" };
-    });
+    setCampaignStates(prev => ({ ...prev, [name]: "boosted" }));
   };
 
   const editAudience = (name: string) => {
-    setEditingCampaign(name);
-    toast.info("Audience editor opened", {
-      description: `Refining targeting for "${name}". Agent will re-optimize within 30 min.`,
-    });
-    setTimeout(() => setEditingCampaign(null), 3000);
+    // handled by dialog now — state update on submit
   };
 
   return (
