@@ -210,7 +210,6 @@ export default function GrowthAgent() {
               >
                 {menuApproved ? "✓ Approved — Ops notified" : "Approve Menu Addition"}
               </Button>
-              </Button>
             </CardContent>
           </Card>
 
