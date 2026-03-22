@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
+import { EditAudienceDialog, BoostBudgetDialog } from "@/components/CampaignDialogs";
 import { growthData } from "@/data/mockData";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Users, Target, TrendingUp, AlertTriangle, Pause, Play, Edit, Zap } from "lucide-react";
@@ -13,7 +14,8 @@ import { toast } from "sonner";
 export default function GrowthAgent() {
   const [menuApproved, setMenuApproved] = useState(false);
   const [campaignStates, setCampaignStates] = useState<Record<string, "running" | "paused" | "boosted">>({});
-  const [editingCampaign, setEditingCampaign] = useState<string | null>(null);
+  const [editAudienceCampaign, setEditAudienceCampaign] = useState<typeof growthData.campaigns[0] | null>(null);
+  const [boostCampaign, setBoostCampaign] = useState<typeof growthData.campaigns[0] | null>(null);
 
   const togglePause = (name: string) => {
     setCampaignStates(prev => {
