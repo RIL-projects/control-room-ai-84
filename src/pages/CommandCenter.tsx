@@ -44,7 +44,8 @@ export default function CommandCenter() {
     } else if (action === "dismiss") {
       toast("Action dismissed", { description: "This item has been removed from the queue." });
     } else if (action === "edit") {
-      toast.info("Edit mode", { description: "Opening action details for editing..." });
+      const entry = visibleFeed.find(e => e.id === entryId);
+      if (entry) setEditingEntry(entry);
     }
   };
 
