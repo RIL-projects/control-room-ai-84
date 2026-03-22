@@ -239,6 +239,18 @@ export default function GrowthAgent() {
           </Card>
         </div>
       </div>
+      <EditAudienceDialog
+        campaign={editAudienceCampaign}
+        open={!!editAudienceCampaign}
+        onClose={() => setEditAudienceCampaign(null)}
+        onSubmit={() => {}}
+      />
+      <BoostBudgetDialog
+        campaign={boostCampaign}
+        open={!!boostCampaign}
+        onClose={() => setBoostCampaign(null)}
+        onSubmit={(name) => boostBudget(name)}
+      />
     </div>
   );
 }
