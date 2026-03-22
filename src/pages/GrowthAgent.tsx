@@ -115,7 +115,7 @@ export default function GrowthAgent() {
             const isPaused = state === "paused";
             const isBoosted = state === "boosted";
             return (
-              <Card key={c.name} className={`bg-card border-border ${isPaused ? "opacity-60" : ""} ${editingCampaign === c.name ? "ring-2 ring-primary" : ""}`}>
+              <Card key={c.name} className={`bg-card border-border ${isPaused ? "opacity-60" : ""}`}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-foreground">{c.name}</h3>
