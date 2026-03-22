@@ -8,6 +8,7 @@ import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
 import { MiniSparkline } from "@/components/MiniSparkline";
 import { FeedEditDialog } from "@/components/FeedEditDialog";
+import { PriorityModifyDialog, PriorityViewDialog, PriorityDismissDialog } from "@/components/PriorityDialogs";
 import { businessPulse, agents, activityFeed, priorities, snapshotMetrics, FeedEntry } from "@/data/mockData";
 import { Star, MapPin, Activity, Check, X, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +21,9 @@ export default function CommandCenter() {
   const [dismissedPriorities, setDismissedPriorities] = useState<Set<string>>(new Set());
   const [feedActions, setFeedActions] = useState<Record<string, string>>({});
   const [editingEntry, setEditingEntry] = useState<FeedEntry | null>(null);
+  const [modifyPriority, setModifyPriority] = useState<typeof priorities[0] | null>(null);
+  const [viewPriority, setViewPriority] = useState<typeof priorities[0] | null>(null);
+  const [dismissPriority, setDismissPriority] = useState<typeof priorities[0] | null>(null);
 
   useEffect(() => {
     setVisibleFeed(activityFeed.slice(0, 3));
@@ -57,8 +61,14 @@ export default function CommandCenter() {
       setDismissedPriorities(prev => new Set(prev).add(priorityId));
       toast("Priority snoozed", { description: "This will reappear in 2 hours." });
     } else if (action === "Dismiss") {
-      setDismissedPriorities(prev => new Set(prev).add(priorityId));
-      toast("Priority dismissed", { description: "Removed from today's list." });
+      const priority = priorities.find(p => p.id === priorityId);
+      if (priority) setDismissPriority(priority);
+    } else if (action === "Modify") {
+      const priority = priorities.find(p => p.id === priorityId);
+      if (priority) setModifyPriority(priority);
+    } else if (action === "View Details") {
+      const priority = priorities.find(p => p.id === priorityId);
+      if (priority) setViewPriority(priority);
     } else if (action === "View") {
       const priority = priorities.find(p => p.id === priorityId);
       if (priority?.label.includes("Growth") || priority?.label.includes("Customer")) {
@@ -228,6 +238,33 @@ export default function CommandCenter() {
         open={!!editingEntry}
         onClose={() => setEditingEntry(null)}
         onSubmit={(entryId) => setFeedActions(prev => ({ ...prev, [entryId]: "edit" }))}
+      />
+      <PriorityModifyDialog
+        priority={modifyPriority}
+        open={!!modifyPriority}
+        onClose={() => setModifyPriority(null)}
+        onSubmit={(id) => { setApprovedPriorities(prev => new Set(prev).add(id)); }}
+      />
+      <PriorityViewDialog
+        priority={viewPriority}
+        open={!!viewPriority}
+        onClose={() => setViewPriority(null)}
+        onNavigate={(id) => {
+          const p = priorities.find(pr => pr.id === id);
+          if (p?.text.includes("Paneer") || p?.text.includes("pricing")) navigate("/finance");
+          else if (p?.text.includes("Mini Meals") || p?.text.includes("menu")) navigate("/operations");
+          else if (p?.text.includes("campaign") || p?.text.includes("Campaign")) navigate("/growth");
+          else navigate("/orchestration");
+        }}
+      />
+      <PriorityDismissDialog
+        priority={dismissPriority}
+        open={!!dismissPriority}
+        onClose={() => setDismissPriority(null)}
+        onConfirm={(id) => {
+          setDismissedPriorities(prev => new Set(prev).add(id));
+          toast("Priority dismissed", { description: "Removed from today's list." });
+        }}
       />
     </div>
   );
