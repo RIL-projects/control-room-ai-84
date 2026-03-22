@@ -188,6 +188,190 @@ export default function FinanceAgent() {
           </CardContent>
         </Card>
       </div>
+      <MarginAlertDialog
+        alert={activeAlert}
+        open={!!activeAlert}
+        onClose={() => setActiveAlert(null)}
+        onSubmit={(id) => {
+          setFixApplied(prev => new Set(prev).add(id));
+          setActiveAlert(null);
+        }}
+      />
     </div>
   );
+}
+
+// ── Margin Alert Dialog ──
+function MarginAlertDialog({ alert, open, onClose, onSubmit }: {
+  alert: typeof financeData.alerts[0] | null;
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (id: string) => void;
+}) {
+  const [priceIncrease, setPriceIncrease] = useState(15);
+  const [supplier, setSupplier] = useState("current");
+  const [qty, setQty] = useState("50");
+  const [vendor, setVendor] = useState("reliance");
+
+  if (!alert) return null;
+
+  // View Fix Options — for paneer cost alert
+  if (alert.action === "View Fix Options") {
+    const affectedDishes = [
+      { dish: "Paneer Butter Masala", currentMargin: 8, newMargin: 8 + Math.round(priceIncrease * 0.6) },
+      { dish: "Shahi Paneer", currentMargin: 12, newMargin: 12 + Math.round(priceIncrease * 0.5) },
+      { dish: "Paneer Tikka", currentMargin: 15, newMargin: 15 + Math.round(priceIncrease * 0.4) },
+      { dish: "Kadai Paneer", currentMargin: 10, newMargin: 10 + Math.round(priceIncrease * 0.5) },
+    ];
+
+    return (
+      <Dialog open={open} onOpenChange={v => !v && onClose()}>
+        <DialogContent className="sm:max-w-[520px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base">Fix Options — Paneer Cost Increase</DialogTitle>
+            <DialogDescription className="text-xs">
+              Paneer wholesale cost up 18% (₹320 → ₹378/kg). Choose a fix strategy below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-center gap-2">
+              <PulseDot color="destructive" size="sm" />
+              <Badge variant="outline" className="text-xs text-destructive">4 dishes affected</Badge>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-foreground mb-2">Option 1: Raise Menu Prices</p>
+              <div className="space-y-2">
+                <Label className="text-xs">Price Increase: ₹{priceIncrease}</Label>
+                <Slider value={[priceIncrease]} min={5} max={30} step={5} onValueChange={v => setPriceIncrease(v[0])} />
+                <div className="space-y-1">
+                  {affectedDishes.map(d => (
+                    <div key={d.dish} className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">{d.dish}</span>
+                      <span>
+                        <span className="text-destructive">{d.currentMargin}%</span>
+                        <span className="text-muted-foreground mx-1">→</span>
+                        <span className="text-success">{d.newMargin}%</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-3">
+              <p className="text-xs font-semibold text-foreground mb-2">Option 2: Switch Supplier</p>
+              <Select value={supplier} onValueChange={setSupplier}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="current">Current Supplier — ₹378/kg (quality: 4.6/5)</SelectItem>
+                  <SelectItem value="krishna">Krishna Dairy — ₹340/kg (quality: 4.5/5)</SelectItem>
+                  <SelectItem value="amul">Amul B2B — ₹355/kg (quality: 4.7/5)</SelectItem>
+                  <SelectItem value="local">Local Wholesaler — ₹330/kg (quality: 4.2/5)</SelectItem>
+                </SelectContent>
+              </Select>
+              {supplier !== "current" && (
+                <p className="text-xs text-success mt-1">
+                  Switching saves ₹{supplier === "krishna" ? "38" : supplier === "amul" ? "23" : "48"}/kg — restores margins by {supplier === "krishna" ? "5-7" : supplier === "amul" ? "3-4" : "6-9"}pp
+                </p>
+              )}
+            </div>
+
+            <div className="border-t border-border pt-3">
+              <p className="text-xs font-semibold text-foreground mb-2">Option 3: Combination</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox id="combo-price" defaultChecked />
+                  <Label htmlFor="combo-price" className="text-xs cursor-pointer">Raise price by ₹10</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox id="combo-supplier" />
+                  <Label htmlFor="combo-supplier" className="text-xs cursor-pointer">Switch to Krishna Dairy (₹340/kg)</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox id="combo-portion" />
+                  <Label htmlFor="combo-portion" className="text-xs cursor-pointer">Reduce portion by 5%</Label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+            <Button size="sm" className="gap-1" onClick={() => {
+              onSubmit(alert.id);
+              toast.success("Fix applied", { description: "Paneer cost fix strategy submitted. Agent will monitor margins for 48 hours." });
+            }}>
+              <Check className="w-3 h-3" /> Apply Fix
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Auto-Order — for packaging cost alert
+  if (alert.action === "Auto-Order") {
+    const unitPrice = vendor === "reliance" ? 8.5 : vendor === "swiggy_pack" ? 9.2 : 7.8;
+    const total = Math.round(parseInt(qty || "0") * unitPrice * 100) / 100;
+    const savings = Math.round((11.5 - unitPrice) * parseInt(qty || "0") * 100) / 100;
+
+    return (
+      <Dialog open={open} onOpenChange={v => !v && onClose()}>
+        <DialogContent className="sm:max-w-[460px]">
+          <DialogHeader>
+            <DialogTitle className="text-base">Auto-Order — Delivery Packaging</DialogTitle>
+            <DialogDescription className="text-xs">
+              Packaging cost has risen 12% over the last month. Bulk ordering can bring it back down.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-center gap-2">
+              <PulseDot color="warning" size="sm" />
+              <Badge variant="outline" className="text-xs">Current cost: ₹11.5/unit</Badge>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">Supplier</Label>
+              <Select value={vendor} onValueChange={setVendor}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="reliance">Reliance B2B — ₹8.50/unit (MOQ: 500)</SelectItem>
+                  <SelectItem value="swiggy_pack">SwiggyPack Wholesale — ₹9.20/unit (MOQ: 200)</SelectItem>
+                  <SelectItem value="local">Local Supplier — ₹7.80/unit (MOQ: 1000)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">Quantity (units)</Label>
+              <Input value={qty} onChange={e => setQty(e.target.value)} className="h-9 text-sm" />
+            </div>
+
+            <Card className="bg-muted/50 border-border">
+              <CardContent className="p-3">
+                <p className="text-xs font-medium text-foreground mb-1">Order Summary</p>
+                <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
+                  <span>Unit Price:</span><span className="text-foreground">₹{unitPrice}/unit</span>
+                  <span>Total Cost:</span><span className="text-foreground font-medium">₹{total.toLocaleString()}</span>
+                  <span>Savings vs Current:</span><span className="text-success font-medium">₹{savings.toLocaleString()}</span>
+                  <span>Est. Duration:</span><span className="text-foreground">{Math.round(parseInt(qty || "0") / 25)} days</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+            <Button size="sm" className="gap-1" onClick={() => {
+              onSubmit(alert.id);
+              toast.success("Bulk order placed", { description: `${qty} packaging units ordered from ${vendor === "reliance" ? "Reliance B2B" : vendor === "swiggy_pack" ? "SwiggyPack" : "Local Supplier"} — saving ₹${savings.toLocaleString()}.` });
+            }}>
+              <Check className="w-3 h-3" /> Place Order
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return null;
 }
