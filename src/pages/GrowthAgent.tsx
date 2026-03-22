@@ -2,12 +2,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
 import { EditAudienceDialog, BoostBudgetDialog } from "@/components/CampaignDialogs";
 import { growthData } from "@/data/mockData";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Users, Target, TrendingUp, AlertTriangle, Pause, Play, Edit, Zap } from "lucide-react";
+import { Users, Target, TrendingUp, AlertTriangle, Pause, Play, Edit, Zap, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
