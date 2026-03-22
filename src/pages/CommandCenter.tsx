@@ -21,6 +21,9 @@ export default function CommandCenter() {
   const [dismissedPriorities, setDismissedPriorities] = useState<Set<string>>(new Set());
   const [feedActions, setFeedActions] = useState<Record<string, string>>({});
   const [editingEntry, setEditingEntry] = useState<FeedEntry | null>(null);
+  const [modifyPriority, setModifyPriority] = useState<typeof priorities[0] | null>(null);
+  const [viewPriority, setViewPriority] = useState<typeof priorities[0] | null>(null);
+  const [dismissPriority, setDismissPriority] = useState<typeof priorities[0] | null>(null);
 
   useEffect(() => {
     setVisibleFeed(activityFeed.slice(0, 3));
