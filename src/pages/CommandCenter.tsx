@@ -8,6 +8,7 @@ import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
 import { MiniSparkline } from "@/components/MiniSparkline";
 import { FeedEditDialog } from "@/components/FeedEditDialog";
+import { PriorityModifyDialog, PriorityViewDialog, PriorityDismissDialog } from "@/components/PriorityDialogs";
 import { businessPulse, agents, activityFeed, priorities, snapshotMetrics, FeedEntry } from "@/data/mockData";
 import { Star, MapPin, Activity, Check, X, Pencil } from "lucide-react";
 import { toast } from "sonner";
