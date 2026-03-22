@@ -143,7 +143,7 @@ export default function GrowthAgent() {
                     <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => togglePause(c.name)}>
                       {isPaused ? <><Play className="w-3 h-3" /> Resume</> : <><Pause className="w-3 h-3" /> Pause</>}
                     </Button>
-                    <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => editAudience(c.name)}>
+                    <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => setEditAudienceCampaign(c)}>
                       <Edit className="w-3 h-3" /> Edit Audience
                     </Button>
                     <Button
@@ -151,7 +151,7 @@ export default function GrowthAgent() {
                       variant="default"
                       className="h-6 text-xs gap-1"
                       disabled={isBoosted}
-                      onClick={() => boostBudget(c.name)}
+                      onClick={() => setBoostCampaign(c)}
                     >
                       {isBoosted ? "✓ Boosted" : <><Zap className="w-3 h-3" /> Boost Budget</>}
                     </Button>
