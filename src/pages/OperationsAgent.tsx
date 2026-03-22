@@ -3,9 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { opsData } from "@/data/mockData";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
-import { Package, ChefHat, Clock, Users } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip as RechartsTooltip, Cell } from "recharts";
+import { Package, ChefHat, Clock, Users, Info } from "lucide-react";
 
 export default function OperationsAgent() {
   return (
@@ -20,23 +21,37 @@ export default function OperationsAgent() {
 
       {/* Overview counters */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <TooltipProvider>
         {[
-          { icon: Clock, label: "Live", value: opsData.ordersLive, color: "text-primary" },
-          { icon: ChefHat, label: "Preparing", value: opsData.ordersPreparing, color: "text-warning" },
-          { icon: Package, label: "Dispatched", value: opsData.ordersDispatched, color: "text-success" },
-          { icon: Package, label: "Completed", value: opsData.ordersCompleted, color: "text-muted-foreground" },
+          { icon: Clock, label: "Live", value: opsData.ordersLive, color: "text-primary", tooltip: "Orders just received, waiting to be picked up by the kitchen" },
+          { icon: ChefHat, label: "Preparing", value: opsData.ordersPreparing, color: "text-warning", tooltip: "Orders currently being cooked in the kitchen" },
+          { icon: Package, label: "Dispatched", value: opsData.ordersDispatched, color: "text-success", tooltip: "Orders handed off to delivery riders, en route to customers" },
+          { icon: Package, label: "Completed", value: opsData.ordersCompleted, color: "text-muted-foreground", tooltip: "Orders successfully delivered or served today" },
           { icon: Users, label: "Staff on Duty", value: `${opsData.staffOnDuty}/${opsData.staffTotal}`, color: "text-foreground" },
         ].map(s => (
           <Card key={s.label} className="bg-card border-border">
             <CardContent className="p-4 flex items-center gap-3">
               <s.icon className={`w-5 h-5 ${s.color}`} />
               <div>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground">{s.label}</p>
+                  {s.tooltip && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3 h-3 text-muted-foreground/50 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[200px] text-xs">
+                        {s.tooltip}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
                 <p className="text-lg font-semibold text-foreground">{typeof s.value === "number" ? <AnimatedCounter value={s.value} /> : s.value}</p>
               </div>
             </CardContent>
           </Card>
         ))}
+        </TooltipProvider>
       </div>
 
       {/* Kitchen capacity */}
@@ -61,7 +76,7 @@ export default function OperationsAgent() {
                 <BarChart data={opsData.hourlyForecast}>
                   <XAxis dataKey="hour" tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }} axisLine={false} tickLine={false} />
-                  <Tooltip
+                  <RechartsTooltip
                     contentStyle={{ background: "white", border: "1px solid hsl(220, 13%, 87%)", borderRadius: 8, fontSize: 12 }}
                     itemStyle={{ color: "hsl(222, 47%, 11%)" }}
                   />
