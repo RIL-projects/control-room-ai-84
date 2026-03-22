@@ -126,7 +126,7 @@ export default function FinanceAgent() {
                     variant={a.level === "destructive" ? "default" : "outline"}
                     className="h-6 text-xs"
                     disabled={fixApplied.has(a.id)}
-                    onClick={() => handleFixAlert(a.id, a.title, a.action!)}
+                    onClick={() => setActiveAlert(a)}
                   >
                     {fixApplied.has(a.id) ? "✓ Applied" : a.action}
                   </Button>
