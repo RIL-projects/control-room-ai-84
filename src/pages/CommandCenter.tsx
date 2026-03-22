@@ -239,6 +239,33 @@ export default function CommandCenter() {
         onClose={() => setEditingEntry(null)}
         onSubmit={(entryId) => setFeedActions(prev => ({ ...prev, [entryId]: "edit" }))}
       />
+      <PriorityModifyDialog
+        priority={modifyPriority}
+        open={!!modifyPriority}
+        onClose={() => setModifyPriority(null)}
+        onSubmit={(id) => { setApprovedPriorities(prev => new Set(prev).add(id)); }}
+      />
+      <PriorityViewDialog
+        priority={viewPriority}
+        open={!!viewPriority}
+        onClose={() => setViewPriority(null)}
+        onNavigate={(id) => {
+          const p = priorities.find(pr => pr.id === id);
+          if (p?.text.includes("Paneer") || p?.text.includes("pricing")) navigate("/finance");
+          else if (p?.text.includes("Mini Meals") || p?.text.includes("menu")) navigate("/operations");
+          else if (p?.text.includes("campaign") || p?.text.includes("Campaign")) navigate("/growth");
+          else navigate("/orchestration");
+        }}
+      />
+      <PriorityDismissDialog
+        priority={dismissPriority}
+        open={!!dismissPriority}
+        onClose={() => setDismissPriority(null)}
+        onConfirm={(id) => {
+          setDismissedPriorities(prev => new Set(prev).add(id));
+          toast("Priority dismissed", { description: "Removed from today's list." });
+        }}
+      />
     </div>
   );
 }
