@@ -124,12 +124,18 @@ function getEditConfig(entry: FeedEntry): EditConfig {
 }
 
 export function FeedEditDialog({ entry, open, onClose, onSubmit }: FeedEditDialogProps) {
-  if (!entry) return null;
+  const config = entry ? getEditConfig(entry) : null;
+  const [values, setValues] = useState<Record<string, string>>({});
 
-  const config = getEditConfig(entry);
-  const [values, setValues] = useState<Record<string, string>>(
-    Object.fromEntries(config.fields.map(f => [f.id, f.defaultValue]))
-  );
+  // Reset values when entry changes
+  const entryId = entry?.id;
+  useState(() => {
+    if (config) {
+      setValues(Object.fromEntries(config.fields.map(f => [f.id, f.defaultValue])));
+    }
+  });
+
+  if (!entry || !config) return null;
 
   const handleChange = (id: string, value: string) => {
     setValues(prev => ({ ...prev, [id]: value }));
