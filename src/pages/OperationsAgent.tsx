@@ -3,9 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { opsData } from "@/data/mockData";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
-import { Package, ChefHat, Clock, Users } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip as RechartsTooltip, Cell } from "recharts";
+import { Package, ChefHat, Clock, Users, Info } from "lucide-react";
 
 export default function OperationsAgent() {
   return (
