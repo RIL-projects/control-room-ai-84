@@ -2,17 +2,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
 import { EditAudienceDialog, BoostBudgetDialog } from "@/components/CampaignDialogs";
 import { growthData } from "@/data/mockData";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Users, Target, TrendingUp, AlertTriangle, Pause, Play, Edit, Zap } from "lucide-react";
+import { Users, Target, TrendingUp, AlertTriangle, Pause, Play, Edit, Zap, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function GrowthAgent() {
   const [menuApproved, setMenuApproved] = useState(false);
+  const [menuDialogOpen, setMenuDialogOpen] = useState(false);
   const [campaignStates, setCampaignStates] = useState<Record<string, "running" | "paused" | "boosted">>({});
   const [editAudienceCampaign, setEditAudienceCampaign] = useState<typeof growthData.campaigns[0] | null>(null);
   const [boostCampaign, setBoostCampaign] = useState<typeof growthData.campaigns[0] | null>(null);
@@ -204,12 +209,7 @@ export default function GrowthAgent() {
               <Button
                 size="sm"
                 disabled={menuApproved}
-                onClick={() => {
-                  setMenuApproved(true);
-                  toast.success("Menu addition approved", {
-                    description: "Operations agent will prepare costing and menu design for 'Mini Meals' category.",
-                  });
-                }}
+                onClick={() => setMenuDialogOpen(true)}
                 className="h-7 text-xs"
               >
                 {menuApproved ? "✓ Approved — Ops notified" : "Approve Menu Addition"}
@@ -251,6 +251,84 @@ export default function GrowthAgent() {
         onClose={() => setBoostCampaign(null)}
         onSubmit={(name) => boostBudget(name)}
       />
+      <Dialog open={menuDialogOpen} onOpenChange={v => !v && setMenuDialogOpen(false)}>
+        <DialogContent className="sm:max-w-[520px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base">Approve Menu Addition — Mini Meals</DialogTitle>
+            <DialogDescription className="text-xs">
+              340+ weekly BharatIQ searches for "quick lunch under ₹200" detected in Powai. Review suggested items and approve to notify Ops Agent.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-warning/10 text-warning border-0 text-xs">Demand Gap</Badge>
+              <span className="text-xs text-muted-foreground">340+ weekly searches · No local match</span>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-foreground mb-2">Suggested Menu Items</p>
+              <div className="space-y-2">
+                {[
+                  { name: "Mini Dal Makhani + Rice", cost: 65, price: 149, margin: 56 },
+                  { name: "Quick Biryani Bowl", cost: 80, price: 179, margin: 55 },
+                  { name: "Mini Thali (3 items)", cost: 90, price: 199, margin: 55 },
+                  { name: "Roti + Sabzi Combo", cost: 50, price: 129, margin: 61 },
+                ].map(item => (
+                  <Card key={item.name} className="bg-muted/50 border-border">
+                    <CardContent className="p-3 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Checkbox id={item.name} defaultChecked />
+                        <Label htmlFor={item.name} className="text-xs font-medium cursor-pointer">{item.name}</Label>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>Cost: ₹{item.cost}</span>
+                        <span>Price: ₹{item.price}</span>
+                        <Badge variant="outline" className="text-xs text-success">{item.margin}% margin</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            <Card className="bg-muted/50 border-border">
+              <CardContent className="p-3 space-y-1">
+                <p className="text-xs font-medium text-foreground">Projected Daily Impact</p>
+                <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                  <div>
+                    <span className="block text-foreground font-medium">15–25</span>
+                    Additional orders/day
+                  </div>
+                  <div>
+                    <span className="block text-foreground font-medium">₹2,475–₹4,125</span>
+                    Daily revenue
+                  </div>
+                  <div>
+                    <span className="block text-foreground font-medium">~57%</span>
+                    Avg margin
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <p className="text-xs text-muted-foreground">
+              ✓ Uses existing kitchen ingredients — minimal additional prep overhead.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setMenuDialogOpen(false)}>Cancel</Button>
+            <Button size="sm" className="gap-1" onClick={() => {
+              setMenuApproved(true);
+              setMenuDialogOpen(false);
+              toast.success("Menu addition approved", {
+                description: "Ops Agent will prepare costing and menu design for 'Mini Meals' category.",
+              });
+            }}>
+              <Check className="w-3 h-3" /> Approve & Notify Ops
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
