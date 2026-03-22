@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { PulseDot } from "@/components/PulseDot";
 import { MiniSparkline } from "@/components/MiniSparkline";
+import { FeedEditDialog } from "@/components/FeedEditDialog";
 import { businessPulse, agents, activityFeed, priorities, snapshotMetrics, FeedEntry } from "@/data/mockData";
 import { Star, MapPin, Activity, Check, X, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ export default function CommandCenter() {
   const [approvedPriorities, setApprovedPriorities] = useState<Set<string>>(new Set());
   const [dismissedPriorities, setDismissedPriorities] = useState<Set<string>>(new Set());
   const [feedActions, setFeedActions] = useState<Record<string, string>>({});
+  const [editingEntry, setEditingEntry] = useState<FeedEntry | null>(null);
 
   useEffect(() => {
     setVisibleFeed(activityFeed.slice(0, 3));
@@ -42,7 +44,8 @@ export default function CommandCenter() {
     } else if (action === "dismiss") {
       toast("Action dismissed", { description: "This item has been removed from the queue." });
     } else if (action === "edit") {
-      toast.info("Edit mode", { description: "Opening action details for editing..." });
+      const entry = visibleFeed.find(e => e.id === entryId);
+      if (entry) setEditingEntry(entry);
     }
   };
 
@@ -220,6 +223,12 @@ export default function CommandCenter() {
           </Card>
         ))}
       </div>
+      <FeedEditDialog
+        entry={editingEntry}
+        open={!!editingEntry}
+        onClose={() => setEditingEntry(null)}
+        onSubmit={(entryId) => setFeedActions(prev => ({ ...prev, [entryId]: "edit" }))}
+      />
     </div>
   );
 }
