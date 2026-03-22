@@ -76,7 +76,7 @@ export default function OperationsAgent() {
                 <BarChart data={opsData.hourlyForecast}>
                   <XAxis dataKey="hour" tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }} axisLine={false} tickLine={false} />
-                  <Tooltip
+                  <RechartsTooltip
                     contentStyle={{ background: "white", border: "1px solid hsl(220, 13%, 87%)", borderRadius: 8, fontSize: 12 }}
                     itemStyle={{ color: "hsl(222, 47%, 11%)" }}
                   />
